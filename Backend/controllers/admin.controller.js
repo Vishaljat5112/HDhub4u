@@ -3,10 +3,11 @@ import jwt from "jsonwebtoken";
 import db from "../config/db.js";
 
 export const loginAdmin = (req, res) => {
-     console.log("LOGIN API HIT");
+     
   const { email, password } = req.body;
 
   if (!email || !password) {
+    console.log("Email & password required");
     return res.status(400).json({ message: "Email & password required" });
   }
 

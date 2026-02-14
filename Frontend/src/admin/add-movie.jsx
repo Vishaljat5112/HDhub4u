@@ -19,50 +19,98 @@ function AddMovieForm() {
     const [poster, setPoster] = useState(null);
     const [screenshots, setScreenshots] = useState([]);
 
-  const handleChange = (e) => {
-  const { name, value } = e.target;
+    const handleChange = (e) => {
+        const { name, value } = e.target;
 
-  setForm({ ...form, [name]: value });
+        setForm({ ...form, [name]: value });
 
-  // clear error for this field
-  if (errors[name]) {
-    setErrors({ ...errors, [name]: false });
-  }
-};
+        // clear error for this field
+        if (errors[name]) {
+            setErrors({ ...errors, [name]: false });
+        }
+    };
 
 
     const validateForm = () => {
-        const newErrors = {};
-        const currentYear = new Date().getFullYear();
+    const newErrors = {};
+    const currentYear = new Date().getFullYear();
 
-        if (!form.title) newErrors.title = true;
-        if (!form.language) newErrors.language = true;
-        if (!form.category) newErrors.category = true;
-        if (!form.director) newErrors.director = true;
-         if (!form.rating) newErrors.rating = true;
-        if (!form.description) newErrors.description = true;
-        if (!genres) newErrors.genres = true;
-        if (!stars) newErrors.stars = true;
+    // Title (3–10 characters)
+    if (!form.title || form.title.trim().length < 3 || form.title.trim().length > 10) {
+        newErrors.title = "Title must be between 3 and 10 characters.";
+    }
 
-        if (!form.year) {
-            newErrors.year = true;
-        } else if (Number(form.year) > currentYear) {
-            newErrors.year = "invalidYear";
-        }
+    // Language (3–10 characters)
+    if (!form.language || form.language.trim().length < 3 || form.language.trim().length > 10) {
+        newErrors.language = "Language must be between 3 and 10 characters.";
+    }
 
-        if (!poster) newErrors.poster = true;
+    // Director (3–10 characters)
+    if (!form.director || form.director.trim().length < 3 || form.director.trim().length > 10) {
+        newErrors.director = "Director name must be between 3 and 10 characters.";
+    }
 
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
-    };
+    // Genres (3–20 characters)
+    if (!genres || genres.trim().length < 3 || genres.trim().length > 20) {
+        newErrors.genres = "Genres must be between 3 and 20 characters.";
+    }
+
+    // Stars (3–30 characters)
+    if (!stars || stars.trim().length < 3 || stars.trim().length > 30) {
+        newErrors.stars = "Stars must be between 3 and 30 characters.";
+    }
+
+    // Description (10–50 characters)
+    if (!form.description || form.description.trim().length < 10 || form.description.trim().length > 50) {
+        newErrors.description = "Description must be between 10 and 50 characters.";
+    }
+
+    // Rating (1–10 number)
+    const ratingNumber = Number(form.rating);
+    if (
+        !form.rating ||
+        isNaN(ratingNumber) ||
+        ratingNumber < 1 ||
+        ratingNumber > 10
+    ) {
+        newErrors.rating = "Rating must be a number between 1 and 10.";
+    }
+
+    // Year (2001 to current year)
+    const yearNumber = Number(form.year);
+    if (!form.year || isNaN(yearNumber)) {
+        newErrors.year = "Year is required.";
+    } else if (yearNumber <= 2000 || yearNumber > currentYear) {
+        newErrors.year = `Year must be between 2001 and ${currentYear}.`;
+    }
+
+    // Category
+    if (!form.category) {
+        newErrors.category = "Please select a category.";
+    }
+
+    // Poster
+    if (!poster) {
+        newErrors.poster = "Please upload poster.";
+    }
+
+    // Screenshots
+    if (!screenshots || screenshots.length === 0) {
+        newErrors.screenshots = "Please upload screenshots.";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+};
+
 
     const handleSubmit = async (e) => {
-             e.preventDefault();
+        e.preventDefault();
         if (!validateForm()) {
             return;
         }
 
-       
+
 
         const data = new FormData();
         Object.keys(form).forEach((key) => {
@@ -88,7 +136,7 @@ function AddMovieForm() {
                 }
             );
 
-            toast.success("Movie added successfully 🎉");
+            toast.success("Movie added successfully");
 
             setErrors({});
 
@@ -109,7 +157,7 @@ function AddMovieForm() {
             setScreenshots([]);
 
         } catch (err) {
-            toast.error("Error adding movie ❌");
+            toast.error("Error adding movie!");
         }
     };
 
@@ -117,21 +165,31 @@ function AddMovieForm() {
         <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow max-w-4xl">
             <div className="grid grid-cols-2 gap-5">
                 <input name="title" value={form.title} placeholder="Title" onChange={handleChange} className={`input ${errors.title ? "border-red-500! border-2!" : ""}`} />
+                {errors.title && (
+                    <p className="text-red-500 text-xs">
+                        Title must between 3-10 characters.
+                    </p>
+                )}
 
-                <input name="year" value={form.year} placeholder="Year" onChange={handleChange} className={`input ${errors.year ?"border-red-500! border-2!" : ""}`} />
+                <input name="year" value={form.year} placeholder="Year" onChange={handleChange} className={`input ${errors.year ? "border-red-500! border-2!" : ""}`} />
                 {errors.year === "invalidYear" && (
                     <p className="text-red-500 text-xs">
-                        Year cannot be greater than current year
+                        Year must be between 2001 and current year
                     </p>
-                
                 )}
+
                 <input name="language" value={form.language} placeholder="Language" onChange={handleChange} className={`input ${errors.language ? "border-red-500! border-2!" : ""}`} />
+                {errors.language && (
+                    <p className="text-red-500 text-xs">
+                        Language must be between 3-10 characters.
+                    </p>
+                )}
 
                 <select
                     name="category"
                     value={form.category}
                     onChange={handleChange}
-                    className={`input ${errors.category ?"border-red-500! border-2!" : ""}`}
+                    className={`input ${errors.category ? "border-red-500! border-2!" : ""}`}
                 >
                     <option value="">Select Category</option>
                     <option value="bollywood">Bollywood</option>
@@ -143,7 +201,17 @@ function AddMovieForm() {
                 </select>
 
                 <input name="rating" value={form.rating} placeholder="Rating" onChange={handleChange} className={`input ${errors.rating ? " border-red-500! border-2!" : ""}`} />
+                {errors.rating && (
+                    <p className="text-red-500 text-xs">
+                        Rating must be between 1 and 10
+                    </p>
+                )}
                 <input name="director" value={form.director} placeholder="Director" onChange={handleChange} className={`input ${errors.director ? "border-red-500! border-2!" : ""}`} />
+                {errors.director && (
+                    <p className="text-red-500 text-xs">
+                        Director name must be between 3-10 characters.
+                    </p>
+                )}
             </div>
 
             <textarea
@@ -154,6 +222,11 @@ function AddMovieForm() {
                 rows="4"
                 onChange={handleChange}
             />
+            {errors.description && (
+                <p className="text-red-500 text-xs">
+                    Description must be between 10-50 characters.
+                </p>
+            )}
 
             <div className="grid grid-cols-2 gap-4 mt-4">
                 <input
@@ -180,7 +253,15 @@ function AddMovieForm() {
                     hidden
                     onChange={(e) => setPoster(e.target.files[0])}
                 />
+
+
             </label>
+            {errors.poster && (
+                <p className="text-red-500 text-xs">
+                    Poster must be a valid image file.
+                </p>
+            )}
+
 
             <label className="block text-sm font-medium mb-1 mt-4">Screenshots</label>
             <label className="flex items-center justify-between border rounded px-4 py-2 cursor-pointer hover:bg-gray-50">
@@ -195,7 +276,13 @@ function AddMovieForm() {
                     hidden
                     onChange={(e) => setScreenshots([...e.target.files])}
                 />
+
             </label>
+            {errors.screenshots && (
+                <p className="text-red-500 text-xs">
+                    Screenshots must be valid image files.
+                </p>
+            )}
 
             <button className="mt-6 bg-black text-white px-6 py-2 rounded">
                 Add Movie

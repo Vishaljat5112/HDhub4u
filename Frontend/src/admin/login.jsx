@@ -10,42 +10,67 @@ export default function AdminLogin() {
     password: "",
   });
 
+  const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [serverError, setServerError] = useState("");
 
   const handleChange = (e) => {
+    const { name, value } = e.target;
+
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [name]: value,
     });
+
+    // Clear error for this field on typing
+    if (errors[name]) {
+      setErrors({ ...errors, [name]: "" });
+    }
+  };
+
+  // Validation function
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!formData.email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (
+      !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(formData.email)
+    ) {
+      newErrors.email = "Invalid email address";
+    }
+
+    if (!formData.password.trim()) {
+      newErrors.password = "Password is required";
+    } else if (formData.password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError("");
+    setServerError("");
 
-    if (!formData.email || !formData.password) {
-      setError("All fields are required");
-      return;
-    }
+    if (!validateForm()) return;
 
     try {
       setLoading(true);
 
       const res = await axios.post(
-        "http://localhost:5000/api/admin/login", //  backend URL
+        "http://localhost:5000/api/admin/login",
         formData
       );
 
-      // JWT + Admin data save
+      // Save JWT + admin info
       localStorage.setItem("adminToken", res.data.token);
       localStorage.setItem("admin", JSON.stringify(res.data.admin));
 
       navigate("/admin/dashboard");
     } catch (err) {
-      setError(
-        err.response?.data?.message || "Invalid email or password"
-      );
+      setServerError(err.response?.data?.message || "Invalid email or password");
     } finally {
       setLoading(false);
     }
@@ -58,27 +83,32 @@ export default function AdminLogin() {
           Admin Login
         </h1>
 
-        {error && (
-          <p className="text-red-500 text-sm mb-3 text-center">
-            {error}
-          </p>
+        {serverError && (
+          <p className="text-red-500 text-sm mb-3 text-center">{serverError}</p>
         )}
 
-        <form onSubmit={handleLogin}>
+        <form onSubmit={handleLogin} noValidate>
+          {/* Email */}
           <div className="mb-4">
             <label className="block text-gray-700 dark:text-gray-400 text-sm font-bold mb-2">
               Email <span className="text-red-500">*</span>
             </label>
             <input
               name="email"
-              type="email"
+              type="text"
               value={formData.email}
               onChange={handleChange}
               placeholder="Email"
-              className="shadow appearance-none border rounded-md w-full py-2 px-3 text-gray-700 focus:outline-none focus:shadow-outline dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+              className={`shadow appearance-none border rounded-md w-full py-2 px-3 text-gray-700 focus:outline-none focus:shadow-outline dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 ${
+                errors.email ? "border-red-500! border-2!" : ""
+              }`}
             />
+            {errors.email && (
+              <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+            )}
           </div>
 
+          {/* Password */}
           <div className="mb-6">
             <label className="block text-gray-700 dark:text-gray-400 text-sm font-bold mb-2">
               Password <span className="text-red-500">*</span>
@@ -89,8 +119,13 @@ export default function AdminLogin() {
               value={formData.password}
               onChange={handleChange}
               placeholder="*************"
-              className="shadow appearance-none border rounded-md w-full py-2 px-3 text-gray-700 focus:outline-none focus:shadow-outline dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+              className={`shadow appearance-none border rounded-md w-full py-2 px-3 text-gray-700 focus:outline-none focus:shadow-outline dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 ${
+                errors.password ? "border-red-500! border-2!" : "border-gray-300 dark:border-gray-600"
+              }`}
             />
+            {errors.password && (
+              <p className="text-red-500 text-xs mt-1">{errors.password}</p>
+            )}
           </div>
 
           <button
