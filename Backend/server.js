@@ -7,11 +7,7 @@ import cors from "cors";
 import "./config/db.js"; 
 import adminRoutes from "./routes/admin.routes.js";
 import movieRoutes from "./routes/movie.routes.js";
-
-
-
-
-
+import categoryRoutes from "./routes/category.routes.js";
 
 const app = express();
 
@@ -24,7 +20,7 @@ console.log("Admin routes loaded");
 app.use("/uploads", express.static("uploads"));
 app.use("/api/admin/movies", movieRoutes);
 
-
+app.use("/api/admin/categories", categoryRoutes);
 // app.use("/api", movieRoutes);
 
 

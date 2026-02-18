@@ -1,8 +1,10 @@
 import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-
-
+import Modal from "../components/common/modal.jsx";
+import AddMovieForm from "./add-movie.jsx";
+import toast from "react-hot-toast";
+import EditMovieForm from "./edit-movie";
 
 
 
@@ -10,17 +12,25 @@ import { useNavigate } from "react-router-dom";
 
 
 export default function MoviesList() {
-  const navigate = useNavigate();  
+  const navigate = useNavigate();
 
   const [movies, setMovies] = useState([]);
   const [profileOpen, setProfileOpen] = useState(false);
   const dropdownRef = useRef();
+  const [open, setOpen] = useState(false);
+
+  const [editOpen, setEditOpen] = useState(false);
+  const [selectedMovie, setSelectedMovie] = useState(null);
+
+
 
   const handleLogout = () => {
     localStorage.removeItem("adminToken");
     localStorage.removeItem("admin");
     navigate("/admin/login");
   };
+
+
 
   useEffect(() => {
     fetchMovies();
@@ -51,27 +61,29 @@ export default function MoviesList() {
     }
   };
 
-  const handleDelete = async (id) => {
-  const confirmDelete = window.confirm("Are you sure you want to delete this movie?");
-  if (!confirmDelete) return;
+  const handleDelete = async (movieId) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this movie?");
+    if (!confirmDelete) return;
 
-  try {
-    await axios.delete(
-      `http://localhost:5000/api/admin/movies/${id}`,
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
-        },
-      }
-    );
+    try {
+      await axios.delete(
+        `http://localhost:5000/api/admin/movies/${movieId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+          },
+        }
+      );
 
-    // UI 
-    setMovies(movies.filter((movie) => movie.id !== id));
-  } catch (err) {
-    alert("Failed to delete movie");
-  }
-};
-  
+      // UI 
+      setMovies((prev) => prev.filter((m) => m.id !== movieId));
+      toast.success("Movie deleted!");
+    } catch (err) {
+      toast.error("Delete failed");
+
+    }
+  };
+
   return (
     <div className="p-4 bg-white rounded shadow max-w-full px-4">
       {/* Header */}
@@ -80,53 +92,13 @@ export default function MoviesList() {
 
         <div className="flex items-center gap-4">
           {/* Add Movie Button */}
-          <a
-            href="http://localhost:5173/admin/add-movie"
-            className="bg-blue-700 hover:bg-blue-800 text-white px-4 py-2 rounded"
+          <button
+            onClick={() => setOpen(true)}
+            className="bg-black text-white px-4 py-2 rounded"
           >
-            Add Movie
-          </a>
+            + Add Movie
+          </button>
 
-          {/* Profile Dropdown */}
-          <div className="relative" ref={dropdownRef}>
-            <button
-              onClick={() => setProfileOpen(!profileOpen)}
-              className="rounded-full hover:bg-gray-200 p-1 focus:outline-none"
-              aria-label="User menu"
-            >
-              {/* Simple User Icon SVG */}
-              <svg
-                className="w-8 h-8 text-gray-700"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M12 12c2.21 0 4-1.79 4-4S14.21 4 12 4 8 5.79 8 8s1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </button>
-
-            {profileOpen && (
-              <div className="absolute right-0 mt-2 w-40 bg-white border rounded shadow-md z-50">
-                <a
-                  href="#"
-                  className="block px-4 py-2 hover:bg-gray-200 text-gray-700"
-                >
-                  Profile
-                </a>
-
-
-                <button
-                  onClick={handleLogout}
-                  className="w-full text-left px-4 py-2 hover:bg-gray-200"
-                >
-                  Logout
-                </button>
-              </div>
-            )}
-          </div>
         </div>
       </div>
 
@@ -176,31 +148,74 @@ export default function MoviesList() {
                     {movie.rating ?? "N/A"}
                   </td>
                   <td className="border border-gray-300 px-4 py-2 capitalize">
-                    {movie.category}
+                    {movie.category_name}
                   </td>
                   <td className="border border-gray-300 px-4 py-2">
-                    <button
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded mr-2"
-                      // Add  Edit handler here
-                      onClick={() => alert(`Edit movie ID: ${movie.id}`)}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(movie.id)}
-                      className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded"
-                      
-                      
-                    >
-                      Delete
-                    </button>
+                    <div className="flex gap-3">
+                      <button
+                        className="bg-blue-600 text-white px-3 py-1 rounded"
+                        onClick={() => {
+                          setSelectedMovie(movie);
+                          setEditOpen(true);
+                        }}
+                      >
+                        Edit
+                      </button>
+
+                      <button
+                        onClick={() => handleDelete(movie.id)}
+                        className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded"
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </td>
+
                 </tr>
               ))
             )}
           </tbody>
         </table>
       </div>
+      {open && (
+        <Modal onClose={() => setOpen(false)}>
+          <h2 className="text-lg font-semibold mb-4">
+            Add Movie
+          </h2>
+
+          <AddMovieForm
+            onSuccess={() => {
+              setOpen(false);
+
+              setTimeout(() => {
+                fetchMovies();
+              }, 0);
+            }}
+          />
+
+        </Modal>
+      )}
+
+      {editOpen && selectedMovie && (
+        <Modal
+          title="Edit Movie"
+          onClose={() => {
+            setEditOpen(false);
+            setSelectedMovie(null);
+          }}
+        >
+          <EditMovieForm
+            movie={selectedMovie}
+            onSuccess={() => {
+              setEditOpen(false);
+              setSelectedMovie(null);
+              fetchMovies(); // list refresh
+            }}
+          />
+        </Modal>
+      )}
+
+
     </div>
   );
 }
