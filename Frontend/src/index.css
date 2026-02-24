@@ -13,3 +13,41 @@
   outline: none;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
 }
+
+
+.meta-tag {
+  background: #2b2b2b;
+  color: #aaa;
+  padding: 6px 10px;
+  font-size: 13px;
+  border-radius: 4px;
+}
+
+.meta-tag.primary {
+  background: #2563eb;
+  color: #fff;
+}
+
+.meta-tag {
+  background: #111;
+  border: 1px solid #333;
+  padding: 5px 10px;
+  font-size: 13px;
+  border-radius: 4px;
+  color: #ddd;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.meta-tag.primary {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #fff;
+}
+
+.divider {
+  border: none;
+  border-top: 1px solid #333;
+  margin: 25px 0;
+}

@@ -1,11 +1,133 @@
 import db from "../config/db.js";
 
+//generate slug
+const slugify = (text) => {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, "")   // special chars remove
+    .replace(/\s+/g, "-");      // space → hyphen
+};
 
+export default slugify;
+
+
+
+//fetch data for detail page
+export const getMovieDetail = (req, res) => {
+  const { slug } = req.params;
+
+  const movieSql = `
+    SELECT 
+      m.id,
+      m.title,
+      m.slug,
+      m.description,
+      m.language,
+      m.rating,
+      m.year,
+      m.poster,
+      m.trailer,
+      m.director
+    FROM movies m
+    WHERE m.slug = ?
+  `;
+
+  db.query(movieSql, [slug], (err, movieResult) => {
+    if (err) {
+      console.error("MOVIE FETCH ERROR 👉", err);
+      return res.status(500).json({ message: "Movie fetch failed" });
+    }
+
+    if (movieResult.length === 0) {
+      return res.status(404).json({ message: "Movie not found" });
+    }
+
+    const movie = movieResult[0];
+    const movieId = movie.id;
+
+    // 🔹 GENRES
+    const genreSql = `
+      SELECT g.name 
+      FROM genres g
+      JOIN movie_genres mg ON mg.genre_id = g.id
+      WHERE mg.movie_id = ?
+    `;
+
+    // 🔹 STARS
+    const starSql = `
+      SELECT s.name
+      FROM stars s
+      JOIN movie_stars ms ON ms.star_id = s.id
+      WHERE ms.movie_id = ?
+    `;
+
+    // 🔹 SCREENSHOTS
+    const screenshotSql = `
+      SELECT image 
+      FROM movie_screenshots
+      WHERE movie_id = ?
+      LIMIT 6
+    `;
+
+    db.query(genreSql, [movieId], (err, genres) => {
+      if (err) return res.status(500).json({ message: "Genre fetch failed" });
+
+      db.query(starSql, [movieId], (err, stars) => {
+        if (err) return res.status(500).json({ message: "Star fetch failed" });
+
+        db.query(screenshotSql, [movieId], (err, screenshots) => {
+          if (err)
+            return res.status(500).json({ message: "Screenshot fetch failed" });
+
+          return res.json({
+            movie,
+            genres: genres.map(g => g.name),
+            stars: stars.map(s => s.name),
+            screenshots: screenshots.map(i => i.image),
+          });
+        });
+      });
+    });
+  });
+};
+
+//search for movies
+export const searchMovies = (req, res) => {
+  const { q } = req.query;
+
+  if (!q) {
+    return res.status(400).json({ message: "Search query required" });
+  }
+
+  const sql = `
+    SELECT DISTINCT m.*
+    FROM movies m
+    LEFT JOIN movie_genres mg ON mg.movie_id = m.id
+    LEFT JOIN genres g ON g.id = mg.genre_id
+    LEFT JOIN movie_stars ms ON ms.movie_id = m.id
+    LEFT JOIN stars s ON s.id = ms.star_id
+    WHERE
+      LOWER(m.title) LIKE LOWER(?)
+      OR LOWER(g.name) LIKE LOWER(?)
+      OR LOWER(s.name) LIKE LOWER(?)
+  `;
+
+  const value = `%${q.trim()}%`;
+
+  db.query(sql, [value, value, value], (err, rows) => {
+    if (err) {
+      console.error("SEARCH ERROR 👉", err);
+      return res.status(500).json({ message: "Search failed" });
+    }
+    res.json(rows);
+  });
+};
 // get movies for user frontend
 
 export const getAllMoviesFront = (req, res) => {
   const sql = `
-    SELECT id, title, year, language, poster
+    SELECT id, title, year,slug, language, poster
     FROM movies
     ORDER BY id DESC
   `;
@@ -275,6 +397,15 @@ export const addMovie = (req, res) => {
 
     const currentYear = new Date().getFullYear();
 
+    // 🔹 SLUG FUNCTION (same file)
+    const generateSlug = (text) => {
+      return text
+        .toLowerCase()
+        .trim()
+        .replace(/[^\w\s-]/g, "")
+        .replace(/\s+/g, "-");
+    };
+
     // CLEAN VALUES
     const titleClean = title?.toString().trim();
     const languageClean = language?.toString().trim();
@@ -284,90 +415,66 @@ export const addMovie = (req, res) => {
     const yearInt = parseInt(year);
     const ratingFloat = parseFloat(rating);
 
-    let genresArray = [];
-    let starsArray = [];
+    // ARRAY CONVERSION
+    const genresArray = genres
+      ? genres.split(",").map(g => g.trim()).filter(Boolean)
+      : [];
 
-    if (genres) genresArray = JSON.parse(genres);
-    if (stars) starsArray = JSON.parse(stars);
+    const starsArray = stars
+      ? stars.split(",").map(s => s.trim()).filter(Boolean)
+      : [];
 
     const errors = {};
 
-    // TITLE (3–10)
-    if (!titleClean || titleClean.length < 3 || titleClean.length > 10) {
-      errors.title = "Title must be between 3 and 10 characters.";
+    // VALIDATIONS
+    if (!titleClean || titleClean.length < 3 || titleClean.length > 100) {
+      errors.title = "Title must be between 3 and 100 characters.";
     }
 
-    // LANGUAGE (3–10)
-    if (!languageClean || languageClean.length < 3 || languageClean.length > 10) {
-      errors.language = "Language must be between 3 and 10 characters.";
+    if (!languageClean || languageClean.length < 3 || languageClean.length > 20) {
+      errors.language = "Language must be between 3 and 20 characters.";
     }
 
-    // DIRECTOR (3–10)
-    if (!directorClean || directorClean.length < 3 || directorClean.length > 10) {
-      errors.director = "Director must be between 3 and 10 characters.";
+    if (!directorClean || directorClean.length < 3 || directorClean.length > 50) {
+      errors.director = "Director must be between 3 and 50 characters.";
     }
 
-    // DESCRIPTION (10–50)
-    if (!descriptionClean || descriptionClean.length < 10 || descriptionClean.length > 50) {
-      errors.description = "Description must be between 10 and 50 characters.";
+    if (!descriptionClean || descriptionClean.length < 10) {
+      errors.description = "Description must be at least 10 characters.";
     }
 
-    // YEAR (2001–current)
     if (!yearInt || yearInt <= 2000 || yearInt > currentYear) {
       errors.year = `Year must be between 2001 and ${currentYear}.`;
     }
 
-    // RATING (1–10)
     if (isNaN(ratingFloat) || ratingFloat < 1 || ratingFloat > 10) {
       errors.rating = "Rating must be between 1 and 10.";
     }
 
-    // CATEGORY
     if (!categoryClean) {
       errors.category = "Category is required.";
     }
 
-    // GENRES (3–10 each item)
     if (!genresArray.length) {
       errors.genres = "At least one genre required.";
-    } else {
-      for (let g of genresArray) {
-        if (g.trim().length < 3 || g.trim().length > 10) {
-          errors.genres = "Each genre must be between 3 and 10 characters.";
-          break;
-        }
-      }
     }
 
-    // STARS (3–30 each item)
     if (!starsArray.length) {
       errors.stars = "At least one star required.";
-    } else {
-      for (let s of starsArray) {
-        if (s.trim().length < 3 || s.trim().length > 30) {
-          errors.stars = "Each star must be between 3 and 30 characters.";
-          break;
-        }
-      }
     }
 
-    // POSTER REQUIRED
     if (!req.files?.poster) {
       errors.poster = "Poster is required.";
     }
 
-    // SCREENSHOTS REQUIRED
     if (!req.files?.screenshots || req.files.screenshots.length === 0) {
       errors.screenshots = "At least one screenshot is required.";
     }
 
-    // TRAILER REQUIRED
     if (!trailer || !/^https?:\/\/.+/.test(trailer)) {
-      errors.trailer = "Valid trailer URL is required"
-
+      errors.trailer = "Valid trailer URL is required";
     }
 
-    // IF ANY ERROR → STOP HERE
     if (Object.keys(errors).length > 0) {
       return res.status(400).json({ errors });
     }
@@ -375,45 +482,66 @@ export const addMovie = (req, res) => {
     // POSTER PATH
     const posterPath = `/uploads/posters/${req.files.poster[0].filename}`;
 
-    // INSERT MOVIE
-    const movieSql = `
-      INSERT INTO movies
-      (title, description, language, year, category_id, rating, poster, director, admin_id, trailer)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `;
+    // 🔹 SLUG GENERATE
+    let slug = generateSlug(titleClean);
 
-    const movieValues = [
-      titleClean,
-      descriptionClean,
-      languageClean,
-      yearInt,
-      categoryClean,
-      ratingFloat,
-      posterPath,
-      directorClean,
-      req.admin.id,
-      trailer,
-    ];
+    // 🔹 CHECK DUPLICATE SLUG
+    const checkSlugSql = "SELECT id FROM movies WHERE slug = ?";
 
-    db.query(movieSql, movieValues, async (err, result) => {
+    db.query(checkSlugSql, [slug], (err, slugResult) => {
       if (err) {
-        return res.status(500).json({ message: "Movie insert failed" });
+        console.error("SLUG CHECK ERROR 👉", err);
+        return res.status(500).json({ message: "Slug check failed" });
       }
 
-      const movieId = result.insertId;
-
-      try {
-        await handleGenres(movieId, genresArray);
-        await handleStars(movieId, starsArray);
-        await handleScreenshots(movieId, req.files.screenshots);
-
-        return res.status(201).json({
-          message: "Movie added successfully",
-          movieId,
-        });
-      } catch (err) {
-        return res.status(500).json({ message: "Relation mapping failed" });
+      if (slugResult.length > 0) {
+        slug = `${slug}-${yearInt}`;
       }
+
+      // 🔹 INSERT MOVIE
+      const movieSql = `
+        INSERT INTO movies
+        (title, slug, description, language, \`year\`, category_id, rating, poster, director, admin_id, trailer)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `;
+
+      const movieValues = [
+        titleClean,
+        slug,
+        descriptionClean,
+        languageClean,
+        yearInt,
+        categoryClean,
+        ratingFloat,
+        posterPath,
+        directorClean,
+        req.admin.id,
+        trailer,
+      ];
+
+      db.query(movieSql, movieValues, async (err, result) => {
+        if (err) {
+          console.error("MOVIE INSERT ERROR 👉", err);
+          return res.status(500).json({ message: "Movie insert failed" });
+        }
+
+        const movieId = result.insertId;
+
+        try {
+          await handleGenres(movieId, genresArray);
+          await handleStars(movieId, starsArray);
+          await handleScreenshots(movieId, req.files.screenshots);
+
+          return res.status(201).json({
+            message: "Movie added successfully",
+            movieId,
+            slug,
+          });
+        } catch (err) {
+          console.error("RELATION ERROR 👉", err);
+          return res.status(500).json({ message: "Relation mapping failed" });
+        }
+      });
     });
 
   } catch (error) {
@@ -423,7 +551,6 @@ export const addMovie = (req, res) => {
     });
   }
 };
-
 
 /*  HELPERS */
 

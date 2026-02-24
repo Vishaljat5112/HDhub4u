@@ -1,23 +1,57 @@
 import express from "express";
 import authMiddleware from "../middleware/auth.middleware.js";
 import upload from "../middleware/upload.middleware.js";
-import { addMovie } from "../controllers/movie.controller.js";
-import { getAllMovies } from "../controllers/movie.controller.js";
 import adminAuth from "../middleware/auth.middleware.js";
-import { deleteMovie } from "../controllers/movie.controller.js";
-import { editMovie } from "../controllers/movie.controller.js";
-import { getSliderMovies } from "../controllers/movie.controller.js";
-import { getAllMoviesFront } from "../controllers/movie.controller.js";
+
+import {
+  addMovie,
+  getAllMovies,
+  deleteMovie,
+  editMovie,
+  getSliderMovies,
+  getAllMoviesFront,
+  searchMovies,
+  getMovieDetail
+} from "../controllers/movie.controller.js";
+
 const router = express.Router();
 
-//get movies for users
+/* =======================
+   PUBLIC ROUTES (NO TOKEN)
+   ======================= */
+
+// get movies for users (grid)
 router.get("/front", getAllMoviesFront);
 
-//get slider
+// get slider movies
 router.get("/slider", getSliderMovies);
 
+// search movies
+router.get("/search", searchMovies);
 
-//edit movie
+// movie detail page (slug)  ⚠️ ALWAYS LAST
+router.get("/:slug", getMovieDetail);
+
+
+/* =======================
+   ADMIN ROUTES (TOKEN)
+   ======================= */
+
+// add movie
+router.post(
+  "/",
+  authMiddleware,
+  upload.fields([
+    { name: "poster", maxCount: 1 },
+    { name: "screenshots", maxCount: 6 },
+  ]),
+  addMovie
+);
+
+// get all movies (admin)
+router.get("/", adminAuth, getAllMovies);
+
+// edit movie
 router.patch(
   "/:id",
   adminAuth,
@@ -28,23 +62,7 @@ router.patch(
   editMovie
 );
 
-
-//  ADD MOVIE ROUTE
-router.post(
-  "/",   //addmovie
-  authMiddleware,
-  upload.fields([
-    { name: "poster", maxCount: 1 },
-    { name: "screenshots", maxCount: 6 },
-  ]),
-  addMovie
-);
-
-// GET MOVIE ROUTE
-router.get("/", adminAuth, getAllMovies);
-
-// DELETE MOVIE ROUTE
+// delete movie
 router.delete("/:id", authMiddleware, deleteMovie);
-
 
 export default router;

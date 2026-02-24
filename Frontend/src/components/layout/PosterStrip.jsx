@@ -15,7 +15,7 @@ export default function PosterStrip() {
   useEffect(() => {
     const fetchSliderMovies = async () => {
       try {
-        const res = await axios.get(`${BASE_URL}/api/admin/movies/slider`);
+        const res = await axios.get("http://localhost:5000/api/admin/movies/slider");
         setMovies(res?.data?.movies || []);
       } catch (error) {
         console.error("Slider fetch error:", error);
@@ -28,7 +28,7 @@ export default function PosterStrip() {
     fetchSliderMovies();
   }, []);
 
-  // ⛔ Swiper empty data pe render nahi karega
+  // Swiper empty data pe render nahi karega
   if (loading || movies.length === 0) return null;
 
   return (

@@ -77,66 +77,114 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="dark:bg-linear-to-l from-gray-900 to-gray-600 flex justify-center items-center w-screen h-screen p-5">
-      <div className="bg-white shadow-md dark:shadow-gray-600 rounded px-8 pt-6 pb-8 mb-4 flex flex-col w-full md:w-1/3 dark:bg-gray-800">
-        <h1 className="text-2xl font-semibold mb-4 text-center text-gray-900 dark:text-gray-200">
-          Admin Login
+  <div className="
+    min-h-screen w-full
+    flex items-center justify-center
+    bg-black
+    px-4
+  ">
+    {/* LOGIN CARD */}
+    <div className="
+      w-full max-w-md
+      bg-black
+      border border-gray-800
+      rounded-2xl
+      shadow-2xl
+      p-6 sm:p-8
+    ">
+      {/* LOGO / TITLE */}
+      <div className="text-center mb-6">
+        <h1 className="text-2xl font-bold tracking-wide text-white">
+          🎬 HDHub4u <span className="text-yellow-500">Admin</span>
         </h1>
-
-        {serverError && (
-          <p className="text-red-500 text-sm mb-3 text-center">{serverError}</p>
-        )}
-
-        <form onSubmit={handleLogin} noValidate>
-          {/* Email */}
-          <div className="mb-4">
-            <label className="block text-gray-700 dark:text-gray-400 text-sm font-bold mb-2">
-              Email <span className="text-red-500">*</span>
-            </label>
-            <input
-              name="email"
-              type="text"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="Email"
-              className={`shadow appearance-none border rounded-md w-full py-2 px-3 text-gray-700 focus:outline-none focus:shadow-outline dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 ${
-                errors.email ? "border-red-500! border-2!" : ""
-              }`}
-            />
-            {errors.email && (
-              <p className="text-red-500 text-xs mt-1">{errors.email}</p>
-            )}
-          </div>
-
-          {/* Password */}
-          <div className="mb-6">
-            <label className="block text-gray-700 dark:text-gray-400 text-sm font-bold mb-2">
-              Password <span className="text-red-500">*</span>
-            </label>
-            <input
-              name="password"
-              type="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="*************"
-              className={`shadow appearance-none border rounded-md w-full py-2 px-3 text-gray-700 focus:outline-none focus:shadow-outline dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 ${
-                errors.password ? "border-red-500! border-2!" : "border-gray-300 dark:border-gray-600"
-              }`}
-            />
-            {errors.password && (
-              <p className="text-red-500 text-xs mt-1">{errors.password}</p>
-            )}
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="bg-green-500 hover:bg-green-700 text-white w-full font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline dark:bg-green-600 disabled:opacity-60"
-          >
-            {loading ? "Logging in..." : "Login"}
-          </button>
-        </form>
+        <p className="text-sm text-gray-400 mt-1">
+          Secure admin access
+        </p>
       </div>
+
+      {serverError && (
+        <p className="text-red-400 text-sm mb-4 text-center">
+          {serverError}
+        </p>
+      )}
+
+      <form onSubmit={handleLogin} noValidate>
+        {/* EMAIL */}
+        <div className="mb-4">
+          <label className="block text-sm font-semibold text-gray-300 mb-1">
+            Email <span className="text-red-500">*</span>
+          </label>
+          <input
+            name="email"
+            type="text"
+            value={formData.email}
+            onChange={handleChange}
+            placeholder="admin@hdhub4u.com"
+            className={`
+              w-full rounded-lg px-4 py-2
+              bg-gray-900 text-white
+              border border-gray-700
+              placeholder-gray-500
+              focus:outline-none focus:border-yellow-500
+              ${errors.email ? "border-red-500" : ""}
+            `}
+          />
+          {errors.email && (
+            <p className="text-red-400 text-xs mt-1">
+              {errors.email}
+            </p>
+          )}
+        </div>
+
+        {/* PASSWORD */}
+        <div className="mb-6">
+          <label className="block text-sm font-semibold text-gray-300 mb-1">
+            Password <span className="text-red-500">*</span>
+          </label>
+          <input
+            name="password"
+            type="password"
+            value={formData.password}
+            onChange={handleChange}
+            placeholder="••••••••••"
+            className={`
+              w-full rounded-lg px-4 py-2
+              bg-gray-900 text-white
+              border border-gray-700
+              placeholder-gray-500
+              focus:outline-none focus:border-yellow-500
+              ${errors.password ? "border-red-500" : ""}
+            `}
+          />
+          {errors.password && (
+            <p className="text-red-400 text-xs mt-1">
+              {errors.password}
+            </p>
+          )}
+        </div>
+
+        {/* SUBMIT */}
+        <button
+          type="submit"
+          disabled={loading}
+          className="
+            w-full py-2 rounded-lg
+            bg-yellow-500 text-black
+            font-bold
+            hover:bg-yellow-400
+            transition
+            disabled:opacity-60
+          "
+        >
+          {loading ? "Logging in..." : "Login"}
+        </button>
+      </form>
+
+      {/* FOOTER */}
+      <p className="text-xs text-gray-500 text-center mt-6">
+        © {new Date().getFullYear()} HDHub4u Admin Panel
+      </p>
     </div>
-  );
+  </div>
+);
 }
