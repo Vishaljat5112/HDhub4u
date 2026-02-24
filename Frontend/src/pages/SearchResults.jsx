@@ -16,23 +16,30 @@ export default function SearchResults() {
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (!query) return;
+useEffect(() => {
+  console.log("Search query:", query);
+  if (!query) return;
 
-    setLoading(true);
+  setLoading(true);
 
-    axios
-      .get(`${BASE_URL}/api/admin/movies/search?q=${query}`)
-      .then((res) => {
-        setMovies(res.data);
-      })
-      .catch((err) => {
-        console.error("Search error", err);
-      })
-      .finally(() => {
-        setLoading(false);
+  axios
+    .get(`${BASE_URL}/api/admin/movies/search?q=${query}`)
+    .then((res) => {
+      // 🔥 YAHI FIX HAI
+      setMovies(Array.isArray(res.data) ? res.data : []);
+    })
+    .catch((error) => {
+      console.error("Search error", {
+        data: error.response?.data,
+        message: error.message,
+        status: error.response?.status,
       });
-  }, [query]);
+      setMovies([]); // safety
+    })
+    .finally(() => {
+      setLoading(false);
+    });
+}, [query]);
 
   return (
     <div className="min-h-screen bg-[#0f0f0f] px-4 md:px-8 py-6">
@@ -79,7 +86,7 @@ export default function SearchResults() {
       {/*  Movies Grid */}
       {!loading && movies.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          {movies.map((movie) => (
+          {Array.isArray(movies) && movies.map((movie) => (
             <MovieCard key={movie.id} movie={movie} />
           ))}
         </div>

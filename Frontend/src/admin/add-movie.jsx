@@ -1,8 +1,9 @@
 import { useEffect, useState, } from "react";
-import axios from "axios";
 import toast from "react-hot-toast";
 import AddCategory from "../components/admin/AddCategory.jsx"
 import Modal from "../components/common/modal.jsx";
+import axios from "axios";
+import axiosInstance from "../services/axiosInstance.js";
 
 function AddMovieForm({ onSuccess }) {
   const [form, setForm] = useState({
@@ -23,19 +24,18 @@ function AddMovieForm({ onSuccess }) {
 
 
 
+
   useEffect(() => {
-    axios
-      .get("http://localhost:5000/api/admin/categories", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
-        },
-      })
+    axiosInstance
+      .get("/api/admin/categories")
       .then((res) => {
         console.log("Categories", res.data);
-        setCategories(res.data);
+        setCategories(Array.isArray(res.data) ? res.data : []);
       })
-      .catch((err) => console.error(err));
-
+      .catch((err) => {
+        console.error("Admin categories error", err);
+        setCategories([]);
+      });
   }, []);
 
   const [errors, setErrors] = useState({});
@@ -125,9 +125,15 @@ function AddMovieForm({ onSuccess }) {
       newErrors.screenshots = "Please upload screenshots.";
     }
 
-    //Trailer
-    if (!form.trailer || !/^https?:\/\/.+/.test(form.trailer.trim())) {
-      newErrors.trailer = "Trailer URL is required.";
+    //Trailer only for youtube links
+    // if (!form.trailer || !/^https?:\/\/.+/.test(form.trailer.trim())) {
+    //   newErrors.trailer = "Trailer URL is required.";
+    // }
+
+    //for any type of links
+
+    if (!form.trailer || form.trailer.trim().length < 10) {
+      newErrors.trailer = "Valid trailer URL is required";
     }
 
     setErrors(newErrors);
@@ -157,15 +163,15 @@ function AddMovieForm({ onSuccess }) {
     });
 
     try {
-      await axios.post(
-        "http://localhost:5000/api/admin/movies",
-        data,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
-          },
-        }
-      );
+  await axios.post(
+  "http://localhost:5000/api/admin/movies",
+  data,
+  {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+    },
+  }
+);
       // setPosterPreview(null);
       // setScreenshotPreviews([]);
 
@@ -462,14 +468,8 @@ function AddMovieForm({ onSuccess }) {
             onSuccess={() => {
               setCatOpen(false);
               setTimeout(() => {
-                axios
-                  .get("http://localhost:5000/api/admin/categories", {
-                    headers: {
-                      Authorization: `Bearer ${localStorage.getItem(
-                        "adminToken"
-                      )}`,
-                    },
-                  })
+                axiosInstance
+                  .get("/api/admin/categories")
                   .then((res) => setCategories(res.data))
                   .catch((err) =>
                     console.error("CATEGORY FETCH ERROR", err)

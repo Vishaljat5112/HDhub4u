@@ -35,7 +35,7 @@ const Modal = ({ children, onClose }) => {
           onClick={onClose}
           className="
             absolute top-3 right-4
-            text-2xl font-bold
+            text-4xl font-bold
             text-gray-400
             hover:text-yellow-500
             transition

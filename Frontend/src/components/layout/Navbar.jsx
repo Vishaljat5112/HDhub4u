@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { Menu, X, ChevronDown } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
+import axiosInstance from "../../services/axiosInstance.js";
+
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
@@ -14,20 +15,20 @@ export default function Navbar() {
     "px-3 py-1 rounded-md transition duration-200 hover:bg-[#2a2a2a] hover:text-white";
 
   // Fetch navbar categories
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const res = await axios.get(
-          `${import.meta.env.VITE_API_URL}/api/user/categories/navbar`
-        );
-        setCategories(res.data);
-      } catch (error) {
-        console.error("Navbar categories error", error);
-      }
-    };
+useEffect(() => {
+  const fetchCategories = async () => {
+    try {
+      const res = await axiosInstance.get(
+        "/api/user/categories/navbar"
+      );
+      setCategories(Array.isArray(res.data) ? res.data : []);
+    } catch (error) {
+      console.error("Navbar categories error", error);
+    }
+  };
 
-    fetchCategories();
-  }, []);
+  fetchCategories();
+}, []);
 
   // SEARCH SUBMIT HANDLER
   const handleSearchSubmit = (e) => {
@@ -68,82 +69,86 @@ export default function Navbar() {
               HDHub4u Home 🏠
             </Link>
 
-            {categories.map((cat) => (
-              <Link
-                key={cat.id}
-                to={`/category/${cat.slug}`}
-                className={navItem}
-              >
-                {cat.name}
-              </Link>
-            ))}
+            {Array.isArray(categories) &&
+              categories.map((cat) => (
+                <Link
+                  key={cat.id}
+                  to={`/category/${cat.slug}`}
+            className={navItem}
+    >
+            {cat.name}
+          </Link>
+          ))
+}
 
-            <span className={`${navItem} flex items-center gap-1 cursor-pointer`}>
-              GENRES <ChevronDown size={16} />
-            </span>
+          <span className={`${navItem} flex items-center gap-1 cursor-pointer`}>
+            GENRES <ChevronDown size={16} />
+          </span>
 
-            <span className={`${navItem} flex items-center gap-1 cursor-pointer`}>
-              More <ChevronDown size={16} />
-            </span>
-          </div>
-
-          {/* RIGHT SEARCH (DESKTOP) */}
-          <form onSubmit={handleSearchSubmit} className="hidden md:block">
-            <input
-              type="text"
-              placeholder="Search movie, star or genre..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="bg-white text-black px-4 py-2 rounded-md w-64"
-            />
-          </form>
-        </div>
-      </div>
-
-      {/* MOBILE DRAWER */}
-      <div
-        className={`fixed top-0 left-0 h-full w-80 bg-[#2b2b2b] text-white z-50 transform ${
-          open ? "translate-x-0" : "-translate-x-full"
-        } transition-transform duration-300 ease-in-out`}
-      >
-        {/* Close */}
-        <div className="p-4 border-b border-gray-700 flex justify-between items-center">
-          <button onClick={() => setOpen(false)}>
-            <X size={26} />
-          </button>
+          <span className={`${navItem} flex items-center gap-1 cursor-pointer`}>
+            More <ChevronDown size={16} />
+          </span>
         </div>
 
-        {/* MOBILE SEARCH */}
-        <form onSubmit={handleSearchSubmit} className="p-4">
+        {/* RIGHT SEARCH (DESKTOP) */}
+        <form onSubmit={handleSearchSubmit} className="hidden md:block">
           <input
             type="text"
             placeholder="Search movie, star or genre..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full px-4 py-2 rounded bg-white text-black"
+            className="bg-white text-black px-4 py-2 rounded-md w-64"
           />
         </form>
+      </div>
+    </div >
 
-        {/* Menu Links */}
-        <div className="flex flex-col text-base">
-          <Link
-            to="/"
-            onClick={() => setOpen(false)}
-            className="px-5 py-4 border-b border-gray-700 hover:bg-gray-700 transition"
-          >
-            HDHub4u Home 🏠
-          </Link>
+      {/* MOBILE DRAWER */ }
+      < div
+  className = {`fixed top-0 left-0 h-full w-80 bg-[#2b2b2b] text-white z-50 transform ${open ? "translate-x-0" : "-translate-x-full"
+    } transition-transform duration-300 ease-in-out`
+}
+      >
+  {/* Close */ }
+  < div className = "p-4 border-b border-gray-700 flex justify-between items-center" >
+    <button onClick={() => setOpen(false)}>
+      <X size={26} />
+    </button>
+        </div >
 
-          {categories.map((cat) => (
-            <Link
-              key={cat.id}
-              to={`/category/${cat.slug}`}
-              onClick={() => setOpen(false)}
-              className="px-5 py-4 border-b border-gray-700 hover:bg-gray-700 transition"
-            >
-              {cat.name}
-            </Link>
-          ))}
+  {/* MOBILE SEARCH */ }
+  < form onSubmit = { handleSearchSubmit } className = "p-4" >
+    <input
+      type="text"
+      placeholder="Search movie, star or genre..."
+      value={search}
+      onChange={(e) => setSearch(e.target.value)}
+      className="w-full px-4 py-2 rounded bg-white text-black"
+    />
+        </form >
+
+  {/* Menu Links */ }
+  < div className = "flex flex-col text-base" >
+    <Link
+      to="/"
+      onClick={() => setOpen(false)}
+      className="px-5 py-4 border-b border-gray-700 hover:bg-gray-700 transition"
+    >
+      HDHub4u Home 🏠
+    </Link>
+
+{
+  categories.map((cat) => (
+    <Link
+      key={cat.id}
+      to={`/category/${cat.slug}`}
+      onClick={() => setOpen(false)}
+      className="px-5 py-4 border-b border-gray-700 hover:bg-gray-700 transition"
+    >
+      {cat.name}
+    </Link>
+  ))
+}
 
           <div className="px-5 py-4 border-b border-gray-700">
             GENRES ▾
@@ -151,16 +156,18 @@ export default function Navbar() {
           <div className="px-5 py-4 border-b border-gray-700">
             More ▾
           </div>
-        </div>
-      </div>
+        </div >
+      </div >
 
-      {/* OVERLAY */}
-      {open && (
-        <div
-          className="fixed inset-0 bg-black/60 z-40"
-          onClick={() => setOpen(false)}
-        ></div>
-      )}
+  {/* OVERLAY */ }
+{
+  open && (
+    <div
+      className="fixed inset-0 bg-black/60 z-40"
+      onClick={() => setOpen(false)}
+    ></div>
+  )
+}
     </>
   );
 }

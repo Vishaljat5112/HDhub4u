@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import axiosInstance from "../../services/axiosInstance.js";
+
 
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
@@ -15,7 +16,7 @@ export default function PosterStrip() {
   useEffect(() => {
     const fetchSliderMovies = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/admin/movies/slider");
+        const res = await axiosInstance.get("/api/admin/movies/slider");
         setMovies(res?.data?.movies || []);
       } catch (error) {
         console.error("Slider fetch error:", error);

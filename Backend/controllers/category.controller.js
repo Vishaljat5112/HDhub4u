@@ -58,7 +58,7 @@ export const updateCategory = (req, res) => {
 
 //get alll category
 export const getAllCategories = (req, res) =>{
-    db.query("SELECT id, name FROM categories", (err, rows) => {
+    db.query("SELECT id, name FROM categories ORDER BY id ASC", (err, rows) => {
         if(err){
             return res.status(500).json({message: "Failed to fetch categories"});
                 }

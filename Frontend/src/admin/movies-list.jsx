@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
-import axios from "axios";
+import axiosInstance from "../services/axiosInstance.js";
+
 import { useNavigate } from "react-router-dom";
 import Modal from "../components/common/modal.jsx";
 import AddMovieForm from "./add-movie.jsx";
@@ -46,11 +47,7 @@ export default function MoviesList() {
 
   const fetchMovies = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/admin/movies", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
-        },
-      });
+      const res = await axiosInstance.get("/api/admin/movies");
       setMovies(res.data);
     } catch (error) {
       console.error("Error fetching movies", error);
@@ -62,14 +59,8 @@ export default function MoviesList() {
     if (!confirmDelete) return;
 
     try {
-      await axios.delete(
-        `http://localhost:5000/api/admin/movies/${movieId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
-          },
-        }
-      );
+      await axiosInstance.delete(
+        `/api/admin/movies/${movieId}` );
 
       // UI 
       setMovies((prev) => prev.filter((m) => m.id !== movieId));

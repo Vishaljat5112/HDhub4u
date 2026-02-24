@@ -7,7 +7,7 @@ export const getMoviesByCategorySlug = (req, res) => {
   console.log("CATEGORY ROUTE HIT", req.params.slug);
   const { slug } = req.params;
 
-  // 1️⃣ Slug se category nikaalo
+  // 1️ Slug se category nikaalo
   const categorySql = `
     SELECT id, name
     FROM categories
@@ -26,7 +26,7 @@ export const getMoviesByCategorySlug = (req, res) => {
 
     const category = categoryRows[0];
 
-    // 2️⃣ Us category ki movies lao (🔥 slug added)
+    // Us category ki movies lao (🔥 slug added)
     const moviesSql = `
       SELECT 
         id,
@@ -43,7 +43,7 @@ export const getMoviesByCategorySlug = (req, res) => {
 
     db.query(moviesSql, [category.id], (err, movies) => {
       if (err) {
-        console.error("MOVIES QUERY ERROR 👉", err);
+        console.error("MOVIES QUERY ERROR ", err);
         return res.status(500).json({ message: "Movies fetch failed" });
       }
 

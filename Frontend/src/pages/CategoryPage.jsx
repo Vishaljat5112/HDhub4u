@@ -1,6 +1,7 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import axios from "axios";
+import axiosInstance from "../services/axiosInstance.js";
+
 
 import MovieCard from "../components/movie/MovieCard";
 import AlertBar from "../components/layout/AlertBar";
@@ -17,25 +18,26 @@ export default function CategoryPage() {
 
   const API_URL = import.meta.env.VITE_API_URL;
 
-  useEffect(() => {
-    const fetchCategoryMovies = async () => {
-      try {
-        setLoading(true);
+ useEffect(() => {
+  const fetchCategoryMovies = async () => {
+    try {
+      setLoading(true);
 
-       const res = await axios.get(
-  `${API_URL}/api/user/categories/${slug}`
-);
-        setMovies(res.data.movies || []);
-        setCategoryName(res.data.category || "");
-      } catch (error) {
-        console.error("Error fetching category movies", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+      const res = await axiosInstance.get(
+        `/api/user/categories/${slug}`
+      );
 
-    fetchCategoryMovies();
-  }, [slug, API_URL]);
+      setMovies(res.data.movies || []);
+      setCategoryName(res.data.category || "");
+    } catch (error) {
+      console.error("Error fetching category movies", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchCategoryMovies();
+}, [slug]);
 
   return (
     <div className="min-h-screen bg-[#0f0f0f] text-white px-4 py-6">

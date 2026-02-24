@@ -1,6 +1,6 @@
 import { useEffect, useState} from "react";
 import toast from "react-hot-toast";
-import axios from "axios";
+import axiosInstance from "../../services/axiosInstance.js";
 
 
 function AddCategory({ onSuccess = () => {} }) {
@@ -10,14 +10,9 @@ function AddCategory({ onSuccess = () => {} }) {
     if (!name.trim()) return toast.error("Name required");
 
     try {
-      await axios.post(
-        "http://localhost:5000/api/admin/categories/add",
+      await axiosInstance.post(
+        "/api/admin/categories/add",
         { name },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
-          },
-        }
       );
 
       toast.success("Category added");

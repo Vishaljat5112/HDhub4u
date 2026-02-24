@@ -46,7 +46,7 @@ export const getMovieDetail = (req, res) => {
     const movie = movieResult[0];
     const movieId = movie.id;
 
-    // 🔹 GENRES
+    //  GENRES
     const genreSql = `
       SELECT g.name 
       FROM genres g
@@ -54,7 +54,7 @@ export const getMovieDetail = (req, res) => {
       WHERE mg.movie_id = ?
     `;
 
-    // 🔹 STARS
+    //  STARS
     const starSql = `
       SELECT s.name
       FROM stars s
@@ -62,7 +62,7 @@ export const getMovieDetail = (req, res) => {
       WHERE ms.movie_id = ?
     `;
 
-    // 🔹 SCREENSHOTS
+    //  SCREENSHOTS
     const screenshotSql = `
       SELECT image 
       FROM movie_screenshots
@@ -94,7 +94,7 @@ export const getMovieDetail = (req, res) => {
 
 //search for movies
 export const searchMovies = (req, res) => {
-  const { q } = req.query;
+const q = req.query.q || req.query.query;
 
   if (!q) {
     return res.status(400).json({ message: "Search query required" });
@@ -471,7 +471,13 @@ export const addMovie = (req, res) => {
       errors.screenshots = "At least one screenshot is required.";
     }
 
-    if (!trailer || !/^https?:\/\/.+/.test(trailer)) {
+    //for youtube trailer link 
+    // if (!trailer || !/^https?:\/\/.+/.test(trailer)) {
+    //   errors.trailer = "Valid trailer URL is required";
+    // }
+
+    
+    if (!trailer || trailer.length < 10) {
       errors.trailer = "Valid trailer URL is required";
     }
 

@@ -7,11 +7,16 @@ export default function AdminLayout() {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef(null);
 
-  const handleLogout = () => {
+const handleLogout = () => {
+  const confirmLogout = window.confirm("Are you sure you want to logout?");
+
+  if (confirmLogout) {
     localStorage.removeItem("adminToken");
     localStorage.removeItem("admin");
+    alert("Logged out successfully");
     navigate("/admin/login");
-  };
+  }
+};
 
   useEffect(() => {
     const handleClickOutside = (e) => {

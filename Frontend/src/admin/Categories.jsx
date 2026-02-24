@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import axiosInstance from "../services/axiosInstance.js";
 
 
 const Categories = () => {
@@ -15,9 +15,7 @@ const token = localStorage.getItem("adminToken");
 
   // fetch categories
   const fetchCategories = async () => {
-    const res = await axios.get("http://localhost:5000/api/admin/categories", {
-      headers,
-    });
+    const res = await axiosInstance.get("/api/admin/categories");
     setCategories(res.data);
   };
 
@@ -30,19 +28,17 @@ const token = localStorage.getItem("adminToken");
     console.log("ADD / UPDATE CLICKED");
     e.preventDefault();
 
-    if (editId) {
-      await axios.put(
-        `http://localhost:5000/api/admin/categories/edit/${editId}`,
-        { name },
-        { headers }
-      );
-    } else {
-      await axios.post(
-        "http://localhost:5000/api/admin/categories/add",
-        { name },
-        { headers }
-      );
-    }
+  if (editId) {
+  await axiosInstance.put(
+    `/api/admin/categories/edit/${editId}`,
+    { name } 
+  );
+} else {
+  await axiosInstance.post(
+    "/api/admin/categories/add",
+    { name } 
+  );
+}
 
     setName("");
     setEditId(null);
@@ -54,9 +50,8 @@ const token = localStorage.getItem("adminToken");
     console.log("DELETE CLICKED", id);
     if (!window.confirm("Delete this category?")) return;
 
-    await axios.delete(
-      `http://localhost:5000/api/admin/categories/delete/${id}`,
-      { headers }
+    await axiosInstance.delete(
+      `/api/admin/categories/delete/${id}`
     );
     fetchCategories();
   };

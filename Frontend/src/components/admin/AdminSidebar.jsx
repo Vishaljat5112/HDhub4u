@@ -124,12 +124,12 @@ export default function Sidebar() {
             Categories
           </NavLink>
 
-          <button
+          {/* <button
             onClick={handleLogout}
             className="w-full text-left px-4 py-3 mt-4 rounded-md font-bold text-red-400 hover:bg-gray-800 hover:text-red-300 transition"
           >
             Logout
-          </button>
+          </button> */}
         </nav>
       </aside>
 

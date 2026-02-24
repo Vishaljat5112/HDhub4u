@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import axiosInstance from "../services/axiosInstance.js";
+
+
 const Dashboard = () => {
   const [stats, setStats] = useState({
     totalMovies: 0,
@@ -7,24 +9,20 @@ const Dashboard = () => {
   });
   const [movies, setMovies] = useState([]);
 
-  const BASE_URL = "http://localhost:5000";
-  const token = localStorage.getItem("adminToken");
 
-  const headers = {
-    Authorization: `Bearer ${token}`,
-  };
 
   //  poster url builder
-  const getPosterUrl = (poster) => {
-    if (!poster) return "http://localhost:5000/uploads/no-poster.jpg";
+const getPosterUrl = (poster) => {
+  const BASE = import.meta.env.VITE_API_URL;
 
-    // poster already "/uploads/..." 
-    if (poster.startsWith("/")) {
-      return `http://localhost:5000${poster}`;
-    }
+  if (!poster) return `${BASE}/uploads/no-poster.jpg`;
 
-    return `http://localhost:5000/${poster}`;
-  };
+  if (poster.startsWith("/")) {
+    return `${BASE}${poster}`;
+  }
+
+  return `${BASE}/${poster}`;
+};
 
   useEffect(() => {
     fetchStats();
@@ -33,9 +31,8 @@ const Dashboard = () => {
 
   const fetchStats = async () => {
     try {
-      const res = await axios.get(
-        `${BASE_URL}/api/admin/dashboard/stats`,
-        { headers }
+      const res = await axiosInstance.get(
+        "/api/admin/dashboard/stats"
       );
       setStats(res.data);
     } catch (err) {
@@ -45,9 +42,8 @@ const Dashboard = () => {
 
   const fetchLatestMovies = async () => {
     try {
-      const res = await axios.get(
-        `${BASE_URL}/api/admin/dashboard/latest-movies?limit=6`,
-        { headers }
+      const res = await axiosInstance.get(
+        "/api/admin/dashboard/latest-movies?limit=6"
       );
       setMovies(res.data);
     } catch (err) {
@@ -69,7 +65,7 @@ return (
     </div>
 
     {/* STATS CARDS*/}
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 px-4 sm:px-6 mb-12">
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 px-4 sm:px-6 mb-12 h-40 w-full">
       {/* TOTAL MOVIES */}
       <div
         className="
@@ -80,7 +76,7 @@ return (
           hover:border-yellow-500 transition
         "
       >
-        <div className="absolute top-4 right-4 text-yellow-500 text-3xl">🎬</div>
+        <div className="absolute top-4 right-4 text-yellow-500 text-4xl">🎬</div>
         <h4 className="text-gray-400 text-sm uppercase tracking-wider">
           Total Movies
         </h4>
@@ -99,7 +95,7 @@ return (
           hover:border-yellow-500 transition
         "
       >
-        <div className="absolute top-4 right-4 text-yellow-500 text-3xl">📂</div>
+        <div className="absolute top-4 right-4 text-yellow-500 text-4xl">📂</div>
         <h4 className="text-gray-400 text-sm uppercase tracking-wider">
           Total Categories
         </h4>
@@ -128,7 +124,7 @@ return (
             "
           >
             {/* POSTER */}
-            <div className="overflow-hidden aspect-2/3">
+            <div className="overflow-hidden aspect-auto">
               <img
                 src={`http://localhost:5000${movie.poster}`}
                 alt={movie.title}

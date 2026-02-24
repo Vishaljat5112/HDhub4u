@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import axiosInstance from "../services/axiosInstance.js";
+
 
 export default function AdminLogin() {
   const navigate = useNavigate();
@@ -59,8 +60,8 @@ export default function AdminLogin() {
     try {
       setLoading(true);
 
-      const res = await axios.post(
-        "http://localhost:5000/api/admin/login",
+      const res = await axiosInstance.post(
+        "/api/admin/login",
         formData
       );
 
