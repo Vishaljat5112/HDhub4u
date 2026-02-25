@@ -26,7 +26,7 @@ export const getMoviesByCategorySlug = (req, res) => {
 
     const category = categoryRows[0];
 
-    // Us category ki movies lao (🔥 slug added)
+    // Us category ki movies lao ( slug added)
     const moviesSql = `
       SELECT 
         id,
@@ -70,7 +70,7 @@ export const getNavbarCategories = (req, res) => {
 
   db.query(sql, (err, rows) => {
     if (err) {
-         console.error("NAVBAR CATEGORY ERROR 👉", err); 
+         console.error("NAVBAR CATEGORY ERROR ", err); 
       return res.status(500).json({ message: "Failed to fetch categories" });
     }
     res.json(rows);

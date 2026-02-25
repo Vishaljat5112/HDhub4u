@@ -35,7 +35,7 @@ export const getMovieDetail = (req, res) => {
 
   db.query(movieSql, [slug], (err, movieResult) => {
     if (err) {
-      console.error("MOVIE FETCH ERROR 👉", err);
+      console.error("MOVIE FETCH ERROR ", err);
       return res.status(500).json({ message: "Movie fetch failed" });
     }
 
@@ -117,7 +117,7 @@ const q = req.query.q || req.query.query;
 
   db.query(sql, [value, value, value], (err, rows) => {
     if (err) {
-      console.error("SEARCH ERROR 👉", err);
+      console.error("SEARCH ERROR ", err);
       return res.status(500).json({ message: "Search failed" });
     }
     res.json(rows);
@@ -496,7 +496,7 @@ export const addMovie = (req, res) => {
 
     db.query(checkSlugSql, [slug], (err, slugResult) => {
       if (err) {
-        console.error("SLUG CHECK ERROR 👉", err);
+        console.error("SLUG CHECK ERROR ", err);
         return res.status(500).json({ message: "Slug check failed" });
       }
 
@@ -527,7 +527,7 @@ export const addMovie = (req, res) => {
 
       db.query(movieSql, movieValues, async (err, result) => {
         if (err) {
-          console.error("MOVIE INSERT ERROR 👉", err);
+          console.error("MOVIE INSERT ERROR ", err);
           return res.status(500).json({ message: "Movie insert failed" });
         }
 
@@ -544,14 +544,14 @@ export const addMovie = (req, res) => {
             slug,
           });
         } catch (err) {
-          console.error("RELATION ERROR 👉", err);
+          console.error("RELATION ERROR ", err);
           return res.status(500).json({ message: "Relation mapping failed" });
         }
       });
     });
 
   } catch (error) {
-    console.error("ADD MOVIE ERROR 👉", error);
+    console.error("ADD MOVIE ERROR ", error);
     return res.status(500).json({
       message: error.message || "Server error"
     });

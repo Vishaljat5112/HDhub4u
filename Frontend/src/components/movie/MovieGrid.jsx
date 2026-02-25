@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import axiosInstance from "../../services/axiosInstance";
 
 import SectionHeader from "./SectionHeader";
 import MovieCard from "./MovieCard";
@@ -11,8 +11,8 @@ export default function MovieGrid() {
   useEffect(() => {
     const fetchMovies = async () => {
       try {
-        const res = await axios.get(
-          "http://localhost:5000/api/admin/movies/front"
+        const res = await axiosInstance.get(
+          "/api/admin/movies/front"
         );
 
         setMovies(res?.data?.movies || []);

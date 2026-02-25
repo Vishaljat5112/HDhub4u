@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import axios from "axios";
+import axiosInstance from "../services/axiosInstance.js";
 import MovieCard from "../components/movie/MovieCard.jsx";
 import AlertBar from "../components/layout/AlertBar";
 import Navbar from "../components/layout/Navbar";
 import PosterStrip from "../components/layout/PosterStrip";
 import TopStrip from "../components/layout/TopStrip";
 
-const BASE_URL = import.meta.env.VITE_API_URL;
+
 
 export default function SearchResults() {
   const location = useLocation();
@@ -22,10 +22,12 @@ useEffect(() => {
 
   setLoading(true);
 
-  axios
-    .get(`${BASE_URL}/api/admin/movies/search?q=${query}`)
+  axiosInstance
+  .get("/api/admin/movies/search", {
+    params: { q: query },
+  })
     .then((res) => {
-      // 🔥 YAHI FIX HAI
+      //  YAHI FIX HAI
       setMovies(Array.isArray(res.data) ? res.data : []);
     })
     .catch((error) => {

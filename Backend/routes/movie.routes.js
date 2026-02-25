@@ -16,9 +16,6 @@ import {
 
 const router = express.Router();
 
-/* =======================
-   PUBLIC ROUTES (NO TOKEN)
-   ======================= */
 
 // get movies for users (grid)
 router.get("/front", getAllMoviesFront);
@@ -29,13 +26,10 @@ router.get("/slider", getSliderMovies);
 // search movies
 router.get("/search", searchMovies);
 
-// movie detail page (slug)  ⚠️ ALWAYS LAST
+// movie detail page (slug)   LAST
 router.get("/:slug", getMovieDetail);
 
 
-/* =======================
-   ADMIN ROUTES (TOKEN)
-   ======================= */
 
 // add movie
 router.post(

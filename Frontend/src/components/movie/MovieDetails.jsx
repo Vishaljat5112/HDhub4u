@@ -3,7 +3,6 @@ import TopStrip from "../layout/TopStrip";
 import PosterStrip from "../layout/PosterStrip";    
 import Navbar from "../layout/Navbar";
 import AlertBar from "../layout/AlertBar";
-import MovieGrid from "./MovieGrid";
 import Footer from "../layout/Footer";
 
 

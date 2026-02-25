@@ -6,7 +6,7 @@ const MovieTrailer = ({ title, poster, trailer }) => {
 
       {/* TITLE */}
       <h3 className="text-red-500 font-semibold mb-5">
-        Download {title} Full Movie Hindi HD | Watch Online Full Movie :-
+        Watch {title} trailer Hindi HD | Watch Online Full Trailer :-
       </h3>
 
       {/* TRAILER BOX */}
