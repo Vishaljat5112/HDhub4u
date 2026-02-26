@@ -129,7 +129,7 @@ export const getAllMoviesFront = (req, res) => {
   console.log("frontmovies api hit ");
   const sql = `
     SELECT id, title, year, slug, language, poster
-    FROM movies
+    FROM hdhub4u_admin.movies
     ORDER BY id DESC
   `;
 
