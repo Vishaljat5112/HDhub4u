@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const db = mysql.createConnection(process.env.MYSQL_URL);
+const db = mysql.createConnection(process.env.MYSQL_URI);
 
 db.connect((err) => {
   if (err) {
