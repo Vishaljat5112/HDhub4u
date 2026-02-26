@@ -126,6 +126,7 @@ const q = req.query.q || req.query.query;
 // get movies for user frontend
 
 export const getAllMoviesFront = (req, res) => {
+  console.log("frontmovies api hit ");
   const sql = `
     SELECT id, title, year, slug, language, poster
     FROM movies
