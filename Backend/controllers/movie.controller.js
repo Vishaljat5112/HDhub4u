@@ -127,27 +127,27 @@ const q = req.query.q || req.query.query;
 
 export const getAllMoviesFront = (req, res) => {
   const sql = `
-    SELECT id, title, year,slug, language, poster
+    SELECT id, title, year, slug, language, poster
     FROM movies
     ORDER BY id DESC
   `;
 
   db.query(sql, (err, result) => {
     if (err) {
-      console.error("Get movies error:", err);
+      console.error("Get front movies error:", err); //  important
       return res.status(500).json({
         success: false,
-        message: "Failed to fetch movies",
+        message: err.message || "Failed to fetch movies",
       });
     }
 
-    res.status(200).json({
+    // Empty result bhi valid response hai
+    return res.status(200).json({
       success: true,
-      movies: result,
+      movies: result || [],
     });
   });
 };
-
 
 export const getSliderMovies = (req, res) => {
   const sql = `
