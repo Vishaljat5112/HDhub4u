@@ -44,7 +44,7 @@ const MovieMeta = ({ movie, genres }) => {
       {/*POSTER */}
       <div className="flex justify-center mb-6">
         <img
-          src={`http://localhost:5000${movie.poster}`}
+        src={`${import.meta.env.VITE_API_URL}${movie.poster}`}
           alt={movie.title}
           className="
             w-60 max-w-[90%]

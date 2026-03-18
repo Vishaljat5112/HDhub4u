@@ -197,23 +197,19 @@ const handleSubmit = async (e) => {
     data.append("movie", movieFile);
   }
 
+  
   try {
 
-    await axios.post(
-      "http://localhost:5000/api/admin/movies",
-      data,
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
-        },
-      }
-    );
+  await axiosInstance.post(
+    "/api/admin/movies",
+    data
+  );
 
-    toast.success("Movie added successfully");
+  toast.success("Movie added successfully");
 
-    if (onSuccess) onSuccess();
+  if (onSuccess) onSuccess();
 
-    setErrors({});
+  setErrors({});
 
     // RESET FORM
     setForm({

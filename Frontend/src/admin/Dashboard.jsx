@@ -126,7 +126,7 @@ return (
             {/* POSTER */}
             <div className="overflow-hidden aspect-auto">
               <img
-                src={`http://localhost:5000${movie.poster}`}
+                 src={`${import.meta.env.VITE_API_URL}${movie.poster}`}
                 alt={movie.title}
                 loading="lazy"
                 className="

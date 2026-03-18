@@ -25,7 +25,7 @@ const MovieTrailer = ({ title, poster, trailer }) => {
       >
         {/* POSTER IMAGE (RECTANGLE) */}
         <img
-          src={`http://localhost:5000${poster}`}
+         src={`${import.meta.env.VITE_API_URL}${poster}`}
           alt={`${title} trailer`}
           className="
             w-full

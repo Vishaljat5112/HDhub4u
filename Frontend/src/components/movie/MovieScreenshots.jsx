@@ -21,13 +21,13 @@ const MovieScreenshots = ({ screenshots }) => {
         {screenshots.map((img, idx) => (
           <a
             key={idx}
-            href={`http://localhost:5000${img}`}
+            href={`${import.meta.env.VITE_API_URL}${img}`}
             target="_blank"
             rel="noreferrer"
             className="block"
           >
             <img
-              src={`http://localhost:5000${img}`}
+             src={`${import.meta.env.VITE_API_URL}${img}`}
               alt={`screenshot-${idx}`}
               className="
                 w-180 max-w-[95%]

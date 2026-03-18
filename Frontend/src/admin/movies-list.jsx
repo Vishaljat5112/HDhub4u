@@ -129,7 +129,7 @@ export default function MoviesList() {
                 {/* POSTER */}
                 <td className="px-4 py-3">
                   <img
-                    src={`http://localhost:5000${movie.poster}`}
+                     src={`${import.meta.env.VITE_API_URL}${movie.poster}`}
                     alt={movie.title}
                     className="w-14 h-20 object-cover rounded-md border border-gray-700"
                   />
