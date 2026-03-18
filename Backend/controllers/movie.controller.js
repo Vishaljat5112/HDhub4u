@@ -1,4 +1,6 @@
 import db from "../config/db.js";
+import cloudinary from "../config/cloudinary.js";
+import fs from "fs";
 
 //generate slug
 const slugify = (text) => {
@@ -28,7 +30,8 @@ export const getMovieDetail = (req, res) => {
       m.year,
       m.poster,
       m.trailer,
-      m.director
+      m.director,
+      m.movie_url
     FROM movies m
     WHERE m.slug = ?
   `;
@@ -172,20 +175,6 @@ export const getSliderMovies = (req, res) => {
     });
   });
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -381,7 +370,7 @@ export const editMovie = (req, res) => {
 
 
 
-export const addMovie = (req, res) => {
+export const addMovie = async (req, res) => {
   try {
     const {
       title,
@@ -398,7 +387,6 @@ export const addMovie = (req, res) => {
 
     const currentYear = new Date().getFullYear();
 
-    // 🔹 SLUG FUNCTION (same file)
     const generateSlug = (text) => {
       return text
         .toLowerCase()
@@ -407,7 +395,6 @@ export const addMovie = (req, res) => {
         .replace(/\s+/g, "-");
     };
 
-    // CLEAN VALUES
     const titleClean = title?.toString().trim();
     const languageClean = language?.toString().trim();
     const directorClean = director?.toString().trim();
@@ -416,7 +403,6 @@ export const addMovie = (req, res) => {
     const yearInt = parseInt(year);
     const ratingFloat = parseFloat(rating);
 
-    // ARRAY CONVERSION
     const genresArray = genres
       ? genres.split(",").map(g => g.trim()).filter(Boolean)
       : [];
@@ -427,7 +413,6 @@ export const addMovie = (req, res) => {
 
     const errors = {};
 
-    // VALIDATIONS
     if (!titleClean || titleClean.length < 3 || titleClean.length > 100) {
       errors.title = "Title must be between 3 and 100 characters.";
     }
@@ -472,12 +457,6 @@ export const addMovie = (req, res) => {
       errors.screenshots = "At least one screenshot is required.";
     }
 
-    //for youtube trailer link 
-    // if (!trailer || !/^https?:\/\/.+/.test(trailer)) {
-    //   errors.trailer = "Valid trailer URL is required";
-    // }
-
-    
     if (!trailer || trailer.length < 10) {
       errors.trailer = "Valid trailer URL is required";
     }
@@ -486,13 +465,31 @@ export const addMovie = (req, res) => {
       return res.status(400).json({ errors });
     }
 
-    // POSTER PATH
     const posterPath = `/uploads/posters/${req.files.poster[0].filename}`;
 
-    // 🔹 SLUG GENERATE
+    // MOVIE CLOUDINARY UPLOAD
+    let movieUrl = null;
+
+    if (req.files?.movie) {
+
+      const movieFile = req.files.movie[0];
+
+      const uploadResult = await cloudinary.uploader.upload(
+        movieFile.path,
+        {
+          resource_type: "video",
+          folder: "movies"
+        }
+      );
+
+      movieUrl = uploadResult.secure_url;
+
+      // delete temp file
+      fs.unlinkSync(movieFile.path);
+    }
+
     let slug = generateSlug(titleClean);
 
-    // 🔹 CHECK DUPLICATE SLUG
     const checkSlugSql = "SELECT id FROM movies WHERE slug = ?";
 
     db.query(checkSlugSql, [slug], (err, slugResult) => {
@@ -505,11 +502,10 @@ export const addMovie = (req, res) => {
         slug = `${slug}-${yearInt}`;
       }
 
-      // 🔹 INSERT MOVIE
       const movieSql = `
         INSERT INTO movies
-        (title, slug, description, language, \`year\`, category_id, rating, poster, director, admin_id, trailer)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        (title, slug, description, language, \`year\`, category_id, rating, poster, director, admin_id, trailer, movie_url)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
 
       const movieValues = [
@@ -524,6 +520,7 @@ export const addMovie = (req, res) => {
         directorClean,
         req.admin.id,
         trailer,
+        movieUrl
       ];
 
       db.query(movieSql, movieValues, async (err, result) => {
@@ -544,6 +541,7 @@ export const addMovie = (req, res) => {
             movieId,
             slug,
           });
+
         } catch (err) {
           console.error("RELATION ERROR ", err);
           return res.status(500).json({ message: "Relation mapping failed" });

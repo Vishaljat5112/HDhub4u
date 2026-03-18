@@ -1,5 +1,15 @@
-const MovieDownload = ({ title }) => {
-  const downloadLink = "https://example.com";
+const MovieDownload = ({ title, movieUrl }) => {
+
+  if (!movieUrl) {
+    return (
+      <div className="my-16 text-center text-red-400">
+        Movie file not available
+      </div>
+    );
+  }
+
+  // Cloudinary direct download trick
+  const downloadUrl = movieUrl.replace("/upload/", "/upload/fl_attachment/");
 
   const qualities = [
     "480p ⚡ [400MB]",
@@ -14,36 +24,26 @@ const MovieDownload = ({ title }) => {
   return (
     <div className="my-16 text-[#ddd]">
 
-      {/* DIVIDER */}
       <hr className="border-t border-[#333] my-4" />
 
-      {/* TOP TITLE */}
+      {/* TITLE */}
       <h3 className="text-center font-semibold mb-3">
         Download {title} Full Movie in Hindi | HD
       </h3>
 
-      {/* DOWNLOAD LINKS TITLE */}
+      {/* DOWNLOAD HEADER */}
       <div className="text-center text-red-500 font-semibold my-2">
         : DOWNLOAD LINKS :
       </div>
 
       <hr className="border-t border-[#333] my-4" />
 
-      {/* SAMPLE */}
-      <div className="text-center text-yellow-400 font-semibold py-3">
-        [SAMPLE]
-      </div>
-
-      <hr className="border-t border-[#333] my-4" />
-
-      {/* QUALITY LINKS */}
+      {/* DOWNLOAD LINKS */}
       {qualities.map((q, idx) => (
         <div key={idx}>
           <div className="text-center py-3">
             <a
-              href={downloadLink}
-              target="_blank"
-              rel="noreferrer"
+              href={downloadUrl}
               className="
                 text-[#3ea6ff]
                 text-base
@@ -58,12 +58,36 @@ const MovieDownload = ({ title }) => {
         </div>
       ))}
 
-      {/* WATCH PLAYER */}
-      <div className="text-center text-green-500 font-semibold py-5">
-        WATCH | PLAYER-2
+      {/* STREAM PLAYER */}
+
+      <div className="mt-10">
+
+        <h3 className="text-center text-green-500 font-semibold mb-4">
+          WATCH ONLINE
+        </h3>
+
+        <div className="flex justify-center">
+
+          <video
+            controls
+            className="
+              w-full
+              max-w-4xl
+              rounded-lg
+              shadow-lg
+              border border-[#333]
+            "
+          >
+            <source src={movieUrl} type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+
+        </div>
+
       </div>
 
-      <hr className="border-t border-[#333]" />
+      <hr className="border-t border-[#333] mt-6" />
+
     </div>
   );
 };

@@ -38,6 +38,7 @@ router.post(
   upload.fields([
     { name: "poster", maxCount: 1 },
     { name: "screenshots", maxCount: 6 },
+    { name: "movie", maxCount: 1 }
   ]),
   addMovie
 );

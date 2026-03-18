@@ -20,6 +20,7 @@ function AddMovieForm({ onSuccess }) {
   const [categories, setCategories] = useState([]);
   const [posterPreview, setPosterPreview] = useState(null);
   const [screenshotPreviews, setScreenshotPreviews] = useState([]);
+
   const [catOpen, setCatOpen] = useState(false);
 
 
@@ -43,6 +44,7 @@ function AddMovieForm({ onSuccess }) {
   const [stars, setStars] = useState("");
   const [poster, setPoster] = useState(null);
   const [screenshots, setScreenshots] = useState([]);
+  const [movieFile, setMovieFile] = useState(null);
 
 
   const handleChange = (e) => {
@@ -125,6 +127,11 @@ function AddMovieForm({ onSuccess }) {
       newErrors.screenshots = "Please upload screenshots.";
     }
 
+    //movie
+    if (!movieFile) {
+      newErrors.movie = "Please upload movie file.";
+    }
+
     //Trailer only for youtube links
     // if (!form.trailer || !/^https?:\/\/.+/.test(form.trailer.trim())) {
     //   newErrors.trailer = "Trailer URL is required.";
@@ -141,71 +148,96 @@ function AddMovieForm({ onSuccess }) {
   };
 
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validateForm()) {
+const handleSubmit = async (e) => {
+  console.log("submit clicked");
+  e.preventDefault();
+
+  if (!validateForm()) {
+    return;
+  }
+
+  // Movie file validation
+  if (movieFile) {
+
+    const allowedTypes = [
+      "video/mp4",
+      "video/x-matroska",
+      "video/quicktime",
+      "video/x-msvideo"
+    ];
+
+    if (!allowedTypes.includes(movieFile.type)) {
+      toast.error("Only video files allowed (MP4, MKV, MOV, AVI)");
       return;
     }
 
+    const maxSize = 200 * 1024 * 1024; // 200MB
 
-
-    const data = new FormData();
-    Object.keys(form).forEach((key) => {
-      data.append(key, form[key]);
-    });
-
-    data.append("genres", genres.trim());
-    data.append("stars", stars.trim());
-    data.append("poster", poster);
-
-    screenshots.forEach((file) => {
-      data.append("screenshots", file);
-    });
-
-    try {
-  await axios.post(
-  "http://localhost:5000/api/admin/movies",
-  data,
-  {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
-    },
-  }
-);
-      // setPosterPreview(null);
-      // setScreenshotPreviews([]);
-
-      toast.success("Movie added successfully");
-
-      if (onSuccess) onSuccess();
-
-
-      // resetForm();
-
-      setErrors({});
-
-      // RESET FORM 
-      setForm({
-        title: "",
-        description: "",
-        language: "",
-        year: "",
-        category_id: "",
-        rating: "",
-        director: "",
-        trailer: "",
-      });
-
-      setGenres("");
-      setStars("");
-      setPoster(null);
-      setScreenshots([]);
-
-    } catch (err) {
-      toast.error("Error adding movie!");
+    if (movieFile.size > maxSize) {
+      toast.error("Movie file must be less than 200MB");
+      return;
     }
-  };
+  }
 
+  const data = new FormData();
+
+  Object.keys(form).forEach((key) => {
+    data.append(key, form[key]);
+  });
+
+  data.append("genres", genres.trim());
+  data.append("stars", stars.trim());
+  data.append("poster", poster);
+
+  screenshots.forEach((file) => {
+    data.append("screenshots", file);
+  });
+
+  if (movieFile) {
+    data.append("movie", movieFile);
+  }
+
+  try {
+
+    await axios.post(
+      "http://localhost:5000/api/admin/movies",
+      data,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+        },
+      }
+    );
+
+    toast.success("Movie added successfully");
+
+    if (onSuccess) onSuccess();
+
+    setErrors({});
+
+    // RESET FORM
+    setForm({
+      title: "",
+      description: "",
+      language: "",
+      year: "",
+      category_id: "",
+      rating: "",
+      director: "",
+      trailer: "",
+    });
+
+    setGenres("");
+    setStars("");
+    setPoster(null);
+    setScreenshots([]);
+    setMovieFile(null);
+
+  } catch (err) {
+    toast.error("Error adding movie!");
+  }
+
+};
   return (
     <form
       onSubmit={handleSubmit}
@@ -444,9 +476,32 @@ function AddMovieForm({ onSuccess }) {
           ))}
         </div>
       </div>
+      {/* MOVIE FILE */}
+      <div className="mt-5">
+        <label className="text-sm font-semibold text-gray-300 mb-1 block">
+          Movie File
+        </label>
+
+        <label className="flex items-center justify-between border border-gray-700 rounded px-4 py-2 cursor-pointer hover:bg-gray-800">
+          <span className="text-gray-400">
+            {movieFile ? movieFile.name : "Choose movie file"}
+          </span>
+
+          <input
+            type="file"
+            hidden
+            accept="video/mp4,video/mkv,video/x-matroska"
+            onChange={(e) => {
+              const file = e.target.files[0];
+              setMovieFile(file);
+            }}
+          />
+        </label>
+      </div>
 
       {/* SUBMIT */}
       <button
+        type="submit"
         className="
         mt-6 w-full sm:w-auto
         bg-yellow-500 text-black
