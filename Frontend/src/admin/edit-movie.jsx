@@ -208,7 +208,7 @@ function EditMovieForm({ movie, onSuccess }) {
     {/* POSTER */}
     <div className="mt-5">
       <span className="text-red-500 text-xs font-medium block mb-1">
-        Change Poster Image (optional)
+         Poster Image (Only for preview)
       </span>
 
       <label
@@ -220,10 +220,10 @@ function EditMovieForm({ movie, onSuccess }) {
         "
       >
         <span className="text-gray-400">
-          {poster ? poster.name : "Change poster image"}
+          {poster ? poster.name : "poster image"}
         </span>
 
-        <input
+        {/* <input
           type="file"
           hidden
           onChange={(e) => {
@@ -233,7 +233,7 @@ function EditMovieForm({ movie, onSuccess }) {
               setPosterPreview(URL.createObjectURL(file));
             }
           }}
-        />
+        /> */}
       </label>
 
       {posterPreview && (
