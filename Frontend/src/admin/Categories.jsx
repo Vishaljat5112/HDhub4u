@@ -50,9 +50,21 @@ const token = localStorage.getItem("adminToken");
     console.log("DELETE CLICKED", id);
     if (!window.confirm("Delete this category?")) return;
 
-    await axiosInstance.delete(
-      `/api/admin/categories/delete/${id}`
-    );
+    // await axiosInstance.delete(
+    //   `/api/admin/categories/delete/${id}`
+    // );
+    try {
+  await axiosInstance.delete(`/api/admin/categories/delete/${id}`);
+  toast.success("Category deleted");
+} catch (error) {
+  toast.error(
+    error.response?.data?.message || "Cannot delete category"
+  );
+}
+
+
+
+
     fetchCategories();
   };
 

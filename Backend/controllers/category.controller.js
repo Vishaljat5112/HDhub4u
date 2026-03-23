@@ -10,24 +10,30 @@ const generateSlug = (text) => {
     .replace(/\s+/g, "-");
 };
 
-//delete category
+// delete category
 export const deleteCategory = (req, res) => {
-    const { id } = req.params;
+  const { id } = req.params;
 
-    const sql = "DELETE FROM categories WHERE id = ?";
-    db.query(sql, [id], (err, result) => {
-        if(err){
-            return res.status(500).json({message: "Category delete failed"});
-        }
+  // Step 1: unlink movies
+  const unlinkSql = "UPDATE movies SET category_id = NULL WHERE category_id = ?";
 
-        if(result.affectedRows === 0){
-            return res.status(404).json({message: "Category not found"});
-        }
+  db.query(unlinkSql, [id], (unlinkErr) => {
+    if (unlinkErr) {
+      return res.status(500).json({ message: "Error unlinking category" });
+    }
 
-        res.json({message: "Category deleted successfully"});
+    // Step 2: delete category
+    const deleteSql = "DELETE FROM categories WHERE id = ?";
+
+    db.query(deleteSql, [id], (err, result) => {
+      if (err) {
+        return res.status(500).json({ message: "Category delete failed" });
+      }
+
+      res.json({ message: "Category deleted successfully" });
     });
+  });
 };
-
 
 // update category
 export const updateCategory = (req, res) => {
